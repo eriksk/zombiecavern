@@ -14,16 +14,16 @@ module ZombieCavern
 		end
 
 		def intersect? other
-			if @position.x > other.position.x + other.width
+			if @position.x > other.position.x + (other.width / 2.0)
 				return false
 			end
-			if @position.x + @width < other.position.x
+			if @position.x + (@width / 2.0) < other.position.x
 				return false
 			end
-			if @position.y > other.position.y + other.height
+			if @position.y > other.position.y + (other.height / 2.0)
 				return false
 			end
-			if @position.y + @height < other.position.y
+			if @position.y + (@height / 2.0) < other.position.y
 				return false
 			end
 			return true

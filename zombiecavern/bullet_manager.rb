@@ -16,6 +16,10 @@ module ZombieCavern
 			@bullets.push bullet
 		end
 
+		def clear
+			@bullets.clear
+		end
+
 		def update dt
 
 			@bullets.each do |b|
