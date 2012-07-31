@@ -58,13 +58,16 @@ module ZombieCavern
 			@reload_bar_tex = load_image('reload_bar')
 			@reload_bar_fill_tex = load_image('reload_bar_fill')
 
-			@zombie_sounds = {
-				:wilhelm_scream => load_sound('wilhelm_scream')
+			@sounds = {
+				:hit => load_sound('zombie_hit'),
+				:wilhelm_scream => load_sound('wilhelm_scream'),
+				:blood_1 => load_sound('blood_1'),
+				:blood_2 => load_sound('blood_2'),
 			}
 
-			@song = load_song('song')
-			@song.volume = 0.5
-			@song.play(true)
+			@song = load_song('song', 'mp3')
+			@song.volume = 0.3
+			#@song.play(true)
 
 			reset()
 		end
@@ -82,8 +85,8 @@ module ZombieCavern
 			Gosu::Sample.new(self, "content/audio/#{name}.wav")
 		end
 
-		def load_song name
-			Gosu::Song.new(self, "content/audio/#{name}.wav")
+		def load_song name, extension = "wav"
+			Gosu::Song.new(self, "content/audio/#{name}.#{extension}")
 		end
 
 		def reset
@@ -137,14 +140,18 @@ module ZombieCavern
 						z.health -= b.damage
 						@particle_manager.fire(z.position, 2)
 						@bullet_manager.bullets.delete b
+						@sounds[:hit].play()
 						if z.health <= 0
 							case z.type
 								when :normal
 									@particle_manager.fire(z.position, 26, 1.0)
+									@sounds[:blood_1].play()
 								when :runner
 									@particle_manager.fire(z.position, 16, 2.0)
+									@sounds[:blood_2].play()
 								when :brute 
-									@zombie_sounds[:wilhelm_scream].play()
+									@sounds[:blood_2].play()
+									@sounds[:wilhelm_scream].play()
 									@particle_manager.fire(z.position, 26, 1.0)
 									@particle_manager.fire(z.position, 128, 5.0, 2.0)
 									@zombie_manager.spawn_children(z.position)
