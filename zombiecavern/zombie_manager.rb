@@ -1,16 +1,18 @@
 module ZombieCavern
 	class ZombieManager
 
-		attr_accessor :zombies
+		attr_accessor :zombies, :wave
 
 		def initialize textures
 			@textures = textures
 			@zombies = []
+			@wave = 0
 		end
 
 		def clear
 			@zombie_count = 1
 			@zombies.clear
+			@wave = 0
 		end
 
 		def spawn_zombies			
@@ -25,15 +27,16 @@ module ZombieCavern
 				z = Zombie.new(@textures[type], type)
 				left = rand() > 0.5
 				if left
-					z.position.x = -100 
+					z.position.x = -100 * rand()
 					z.position.y = rand() * $HEIGHT
 				else
-					z.position.x = $WIDTH + 100 
+					z.position.x = $WIDTH + 100 * rand()
 					z.position.y = rand() * $HEIGHT
 				end
 				@zombies.push z
 			end
-			@zombie_count *= 1.2
+			@zombie_count *= 1.6
+			@wave += 1
 		end
 
 		def spawn_children position		
