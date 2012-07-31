@@ -8,11 +8,12 @@ module ZombieCavern
 			@bullet_tex = bullet_tex
 		end
 
-		def fire position, velocity
+		def fire position, velocity, damage
 			bullet = Bullet.new(@bullet_tex)
 			bullet.position = position
 			bullet.velocity = velocity
 			bullet.rotation = Math::atan2(velocity.y, velocity.x)
+			bullet.damage = damage
 			@bullets.push bullet
 		end
 

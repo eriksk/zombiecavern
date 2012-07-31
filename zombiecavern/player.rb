@@ -1,13 +1,42 @@
 module ZombieCavern
 	class Player < Entity
 
+		attr_accessor :current_weapon, :weapons
+
 		def initialize texture
 			super(texture)
 			@speed = 0.001
 			@velocity = Vec2.new
+
+			@weapons = {
+				:gun => Weapon.new(100, 5),
+				:smg => Weapon.new(30, 1, 0.2),
+				:cannon => Weapon.new(1000, 100, 0)
+			}
+			@current_weapon = :smg
+		end
+
+		def reset
+			@weapons.each do |k, v|
+				v.reload
+			end
+		end
+
+		def switch_weapon weapon
+			@current_weapon = weapon
+		end
+
+		def selected_weapon_index
+			@weapons.each_with_index do |(k, v), index|
+				if k == @current_weapon
+					return index
+				end
+			end
+			return 0
 		end
 
 		def update dt
+			@weapons[@current_weapon].update(dt)
 
 			# input
 			if $game.button_down?Gosu::KbA

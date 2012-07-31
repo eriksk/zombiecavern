@@ -9,6 +9,8 @@ require_relative 'zombiecavern/bullet_manager'
 require_relative 'zombiecavern/particle'
 require_relative 'zombiecavern/particle_manager'
 require_relative 'zombiecavern/timer'
+require_relative 'zombiecavern/weapon'
+require_relative 'zombiecavern/zombie_manager'
 
 $WIDTH = 800
 $HEIGHT = 600
@@ -20,6 +22,8 @@ module ZombieCavern
 		def initialize
 			super $WIDTH, $HEIGHT, false
 			self.caption = "Zombie Cavern"
+
+			@font = Gosu::Font.new(self, Gosu::default_font_name, 24)
 
 			@bg = load_image('bg')
 			@filter = load_image('filter')
@@ -33,50 +37,25 @@ module ZombieCavern
 
 			@bullet_manager = BulletManager.new(load_image('bullet'))
 			@particle_manager = ParticleManager.new(load_image('particle'))
-
-			@zombies = []
-			@zombie_textures = {
-				:normal  => load_image('zombie'),
-				:runner  => load_image('zombie_runner'),
-				:brute  => load_image('zombie_brute'),
+			zombie_textures = {
+				:normal => load_image('zombie'),
+				:runner => load_image('zombie_runner'),
+				:brute => load_image('zombie_brute'),
 			}
-			@zombie_spawn_timer = Timer.new(1000, lambda{
-				spawn_zombies()
-			})
-			@zombie_count = 1
-			spawn_zombies()
+			@zombie_manager = ZombieManager.new(zombie_textures)
+
+			@guns_tex = load_image('guns')
+			@selected_weapon_tex = load_image('selected_weapon')
+
+			@splat_tex = load_image('splat')
+			@splats = []
+
+			reset()
 		end
 
-		def spawn_zombies			
-			@zombie_count.to_i.times do |i|
-				type = :normal
-				type_val = rand()
-				if type_val > 0.9
-					type = :brute
-				elsif type_val > 0.8
-					type = :runner
-				end
-				z = Zombie.new(@zombie_textures[type], type)
-				left = rand() > 0.5
-				if left
-					z.position.x = -100 
-					z.position.y = rand() * $HEIGHT
-				else
-					z.position.x = $WIDTH + 100 
-					z.position.y = rand() * $HEIGHT
-				end
-				@zombies.push z
-			end
-			@zombie_count *= 1.05
-		end
 
-		def spawn_children position		
-			4.times do |i|
-				z = Zombie.new(@zombie_textures[:normal], :normal)
-				z.position.x = position.x + (-0.5 + rand()) * 64
-				z.position.y = position.y + (-0.5 + rand()) * 64
-				@zombies.push z
-			end
+		def add_splat(position)
+			@splats.push position
 		end
 
 		def load_image name
@@ -84,11 +63,13 @@ module ZombieCavern
 		end
 
 		def reset
-			@zombie_count = 1
-			@zombies.clear
+			@zombie_manager.clear
 			@bullet_manager.clear
 			@player.position.x = $WIDTH / 2.0
 			@player.position.y = $HEIGHT / 2.0
+			@splats.clear
+			@player.reset
+			@zombie_manager.spawn_zombies()
 		end
 
 		def update
@@ -98,39 +79,36 @@ module ZombieCavern
 
 			dt = 16.0
 			@corsair_rotation += 0.15 * dt
-			@zombie_spawn_timer.update dt
+
+			# switch weapons
+			if button_down? Gosu::Kb1
+				@player.switch_weapon(:gun)
+			elsif button_down? Gosu::Kb2
+				@player.switch_weapon(:smg)
+			elsif button_down? Gosu::Kb3
+				@player.switch_weapon(:cannon)
+			end
 			
 			# bullets
 			if button_down? Gosu::MsLeft
-				angle = @player.rotation + (-0.5 + rand()) * 0.3
-				@bullet_manager.fire(
-					@player.position.clone, 
-					Vec2.new(Math::cos(angle), 
-						     Math::sin(angle)) * 0.5)
+				angle = @player.rotation
+				@player.weapons[@player.current_weapon].fire(@bullet_manager, @player.position, angle)
 			end
 
 			# player
 			@player.update dt	
 			@player.rotation = Math::atan2(mouse_y - @player.position.y, 
 										   mouse_x - @player.position.x)	
-
-			# zombies
-			@zombies.each do |z|
-				z.update dt, @player
-				if z.intersect? @player
-					reset()
-					break
-				end
-			end	
-
+		
+			@zombie_manager.update(dt, @player)
 			@bullet_manager.update dt
 			@particle_manager.update dt
 
 			# collision
 			@bullet_manager.bullets.each do |b|
-				@zombies.each do |z|
+				@zombie_manager.zombies.each do |z|
 					if z.intersect? b
-						z.health -= 1
+						z.health -= b.damage
 						@particle_manager.fire(z.position, 2)
 						@bullet_manager.bullets.delete b
 						if z.health <= 0
@@ -144,8 +122,9 @@ module ZombieCavern
 									@particle_manager.fire(z.position, 128, 5.0, 2.0)
 									spawn_children(z.position)
 								else
-							end							
-							@zombies.delete z
+							end				
+							add_splat(z.position.clone)			
+							@zombie_manager.zombies.delete z
 						end
 					end
 				end
@@ -155,19 +134,29 @@ module ZombieCavern
 		def draw
 			@bg.draw(0,0,0)
 
-			@zombies.each do |z|
-				z.draw
-			end	
+			@splats.each do |vec|
+				@splat_tex.draw_rot(vec.x, vec.y, 0, 0)
+			end
 
+			@zombie_manager.draw
 			@bullet_manager.draw
 			@particle_manager.draw
 
 			@player.draw
 
-			@filter.draw(0,0,0)
+			@filter.draw(0, 0, 0)
 
 			@corsair.draw_rot(mouse_x, mouse_y, 0.0, @corsair_rotation)
 			@corsair.draw_rot(mouse_x, mouse_y, 0.0, -@corsair_rotation, 0.5, 0.5, 0.6, 0.6)
+
+			draw_hud()
+		end
+
+		def draw_hud
+			@guns_tex.draw(16, 16, 0)
+			@selected_weapon_tex.draw(16 + (16 * @player.selected_weapon_index), 16, 0)
+
+			@font.draw("DPS: #{@player.weapons[@player.current_weapon].dps}", 16, 64, 0)
 		end
 	end
 end
