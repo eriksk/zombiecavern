@@ -78,6 +78,8 @@ module ZombieCavern
 			large_font = Gosu::Font.new(self, Gosu::default_font_name, 64)
 			@message_box = MessageBox.new(large_font)
 
+			@paused = false
+
 			reset()
 		end
 
@@ -122,7 +124,16 @@ module ZombieCavern
 				exit
 			end
 
+			if button_down? Gosu::KbSpace
+				paused = !paused
+			end
+
 			dt = 16.0
+
+			if paused
+				dt = 0.0
+			end
+
 			@total_time += dt
 			@corsair_rotation += 0.15 * dt
 
@@ -212,7 +223,7 @@ module ZombieCavern
 			# zombies
 			@zombie_manager.zombies.each do |z|
 				if z.intersect? @player
-					reset()
+					#reset()
 					break
 				end
 			end	
