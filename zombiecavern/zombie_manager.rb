@@ -33,7 +33,7 @@ module ZombieCavern
 				end
 				@zombies.push z
 			end
-			@zombie_count *= 1.05
+			@zombie_count *= 1.2
 		end
 
 		def spawn_children position		
@@ -54,10 +54,6 @@ module ZombieCavern
 			# zombies
 			@zombies.each do |z|
 				z.update dt, player
-				if z.intersect? player
-					reset()
-					break
-				end
 			end	
 
 		end

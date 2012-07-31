@@ -3,13 +3,13 @@ module ZombieCavern
 
 		attr_accessor :bullets
 
-		def initialize bullet_tex
+		def initialize bullet_textures
 			@bullets = []
-			@bullet_tex = bullet_tex
+			@bullet_textures = bullet_textures
 		end
 
-		def fire position, velocity, damage
-			bullet = Bullet.new(@bullet_tex)
+		def fire position, velocity, damage, type
+			bullet = Bullet.new(@bullet_textures[type])
 			bullet.position = position
 			bullet.velocity = velocity
 			bullet.rotation = Math::atan2(velocity.y, velocity.x)

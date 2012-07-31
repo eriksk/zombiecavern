@@ -3,15 +3,15 @@ module ZombieCavern
 
 		attr_accessor :current_weapon, :weapons
 
-		def initialize texture
+		def initialize texture, game
 			super(texture)
 			@speed = 0.001
 			@velocity = Vec2.new
 
 			@weapons = {
-				:gun => Weapon.new(100, 5),
-				:smg => Weapon.new(30, 1, 0.2),
-				:cannon => Weapon.new(1000, 100, 0)
+				:gun => Weapon.new(game.load_sound('fire_gun'), :gun, 100, 5),
+				:smg => Weapon.new(game.load_sound('fire_smg'), :smg, 30, 1, 0.2),
+				:cannon => Weapon.new(game.load_sound('fire_cannon'), :cannon, 1000, 100, 0)
 			}
 			@current_weapon = :smg
 		end
@@ -71,7 +71,7 @@ module ZombieCavern
 				@velocity.y *= -1
 			end
 			if @position.y > $HEIGHT
-				@position.y = $HEIGHTw
+				@position.y = $HEIGHT
 				@velocity.y *= -1
 			end
 		end

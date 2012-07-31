@@ -23,7 +23,7 @@ module ZombieCavern
 			super $WIDTH, $HEIGHT, false
 			self.caption = "Zombie Cavern"
 
-			@font = Gosu::Font.new(self, Gosu::default_font_name, 24)
+			@font = Gosu::Font.new(self, Gosu::default_font_name, 18)
 
 			@bg = load_image('bg')
 			@filter = load_image('filter')
@@ -31,11 +31,16 @@ module ZombieCavern
 			@corsair = load_image('corsair')
 			@corsair_rotation = 0.0
 
-			@player = Player.new(load_image('player'))
+			@player = Player.new(load_image('player'), self)
 			@player.position.x = $WIDTH / 2.0
 			@player.position.y = $HEIGHT / 2.0
 
-			@bullet_manager = BulletManager.new(load_image('bullet'))
+			@bullet_textures = {
+				:gun => load_image('bullet_gun'),
+				:smg => load_image('bullet_smg'),
+				:cannon => load_image('bullet_cannon'),
+			}
+			@bullet_manager = BulletManager.new(@bullet_textures)
 			@particle_manager = ParticleManager.new(load_image('particle'))
 			zombie_textures = {
 				:normal => load_image('zombie'),
@@ -50,6 +55,17 @@ module ZombieCavern
 			@splat_tex = load_image('splat')
 			@splats = []
 
+			@reload_bar_tex = load_image('reload_bar')
+			@reload_bar_fill_tex = load_image('reload_bar_fill')
+
+			@zombie_sounds = {
+				:wilhelm_scream => load_sound('wilhelm_scream')
+			}
+
+			@song = load_song('song')
+			@song.volume = 0.5
+			@song.play(true)
+
 			reset()
 		end
 
@@ -60,6 +76,14 @@ module ZombieCavern
 
 		def load_image name
 			Gosu::Image.new(self, "content/gfx/#{name}.png", false)
+		end
+
+		def load_sound name
+			Gosu::Sample.new(self, "content/audio/#{name}.wav")
+		end
+
+		def load_song name
+			Gosu::Song.new(self, "content/audio/#{name}.wav")
 		end
 
 		def reset
@@ -92,7 +116,9 @@ module ZombieCavern
 			# bullets
 			if button_down? Gosu::MsLeft
 				angle = @player.rotation
-				@player.weapons[@player.current_weapon].fire(@bullet_manager, @player.position, angle)
+				if @player.weapons[@player.current_weapon].fire(@bullet_manager, @player.position, angle)
+					@player.weapons[@player.current_weapon].sound.play()
+				end
 			end
 
 			# player
@@ -118,9 +144,10 @@ module ZombieCavern
 								when :runner
 									@particle_manager.fire(z.position, 16, 2.0)
 								when :brute 
+									@zombie_sounds[:wilhelm_scream].play()
 									@particle_manager.fire(z.position, 26, 1.0)
 									@particle_manager.fire(z.position, 128, 5.0, 2.0)
-									spawn_children(z.position)
+									@zombie_manager.spawn_children(z.position)
 								else
 							end				
 							add_splat(z.position.clone)			
@@ -129,6 +156,14 @@ module ZombieCavern
 					end
 				end
 			end
+
+			# zombies
+			@zombie_manager.zombies.each do |z|
+				if z.intersect? @player
+					reset()
+					break
+				end
+			end	
 		end
 
 		def draw
@@ -156,7 +191,10 @@ module ZombieCavern
 			@guns_tex.draw(16, 16, 0)
 			@selected_weapon_tex.draw(16 + (16 * @player.selected_weapon_index), 16, 0)
 
-			@font.draw("DPS: #{@player.weapons[@player.current_weapon].dps}", 16, 64, 0)
+			@reload_bar_tex.draw(16, 42, 0)
+			@reload_bar_fill_tex.draw_rot(17, 43, 0, 0, 0.0, 0.0, @player.weapons[@player.current_weapon].progress * 2.0, 1.0)
+
+			@font.draw("DPS: #{@player.weapons[@player.current_weapon].dps}", 16, 60, 0)
 		end
 	end
 end
