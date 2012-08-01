@@ -37,6 +37,8 @@ module ZombieCavern
 					  :kill_count,
 					  :paused
 
+		STATES = [:start_screen, :running]
+
 		def initialize
 			super $WIDTH, $HEIGHT, false
 			self.caption = "Zombie Cavern"
@@ -76,6 +78,7 @@ module ZombieCavern
 			@time = Gosu::milliseconds
 			@last_frame_time = 0.0
 			@delta = @time
+			@state = :start_screen
 
 			# start game
 			reset()
@@ -112,6 +115,7 @@ module ZombieCavern
 			@total_time = 0.0
 			@kill_count = 0
 			@hud.message_box.show_message("Survive!")
+			@state = :start_screen
 		end
 
 		def zombie_killed
@@ -121,7 +125,9 @@ module ZombieCavern
 		def button_down(id)
 			case id
 			when Gosu::KbSpace
-				@paused = !@paused
+				if @state == :running
+					@paused = !@paused
+				end
 			when Gosu::KbEscape
 				exit
 			end
@@ -138,38 +144,52 @@ module ZombieCavern
 			dt = @delta
 
 			if !@paused
-				@total_time += dt
-				@corsair_rotation += 0.15 * dt
-				
-				@player.update dt	
-				@zombie_manager.update(dt, @player)
-				@bullet_manager.update dt
-				@particle_manager.update dt
-				@collision_manager.update dt
-				@pickup_manager.update dt
-				@hud.update dt
+				case @state
+					when :running
+						@total_time += dt
+						@corsair_rotation += 0.15 * dt
+						
+						@player.update dt	
+						@zombie_manager.update(dt, @player)
+						@bullet_manager.update dt
+						@particle_manager.update dt
+						@collision_manager.update dt
+						@pickup_manager.update dt
+					when :start_screen
+						if button_down?Gosu::KbSpace
+							@state = :running
+						end
+				end
 			end
+
+			@hud.update dt
 		end
 
 		def draw
 			@bg.draw(0,0,0)
 
-			@splats.each do |splat|
-				@splat_tex.draw_rot(splat.position.x, splat.position.y, 0, splat.rotation.to_degrees)
+			case @state
+				when :running
+					@splats.each do |splat|
+						@splat_tex.draw_rot(splat.position.x, splat.position.y, 0, splat.rotation.to_degrees)
+					end
+
+					@pickup_manager.draw
+					@zombie_manager.draw
+					@bullet_manager.draw
+					@particle_manager.draw
+
+					@player.draw
+					@filter.draw(0, 0, 0)
+
+					@corsair.draw_rot(mouse_x, mouse_y, 0.0, @corsair_rotation, 0.5, 0.5, Math::sin(@total_time * 0.01), Math::sin(@total_time * 0.005))
+					@corsair.draw_rot(mouse_x, mouse_y, 0.0, -@corsair_rotation, 0.5, 0.5, 1, 1)
+
+					@hud.draw()
+				when :start_screen
+					@filter.draw(0, 0, 0)
+					@hud.draw_start_screen()
 			end
-
-			@pickup_manager.draw
-			@zombie_manager.draw
-			@bullet_manager.draw
-			@particle_manager.draw
-
-			@player.draw
-			@filter.draw(0, 0, 0)
-
-			@corsair.draw_rot(mouse_x, mouse_y, 0.0, @corsair_rotation, 0.5, 0.5, Math::sin(@total_time * 0.01), Math::sin(@total_time * 0.005))
-			@corsair.draw_rot(mouse_x, mouse_y, 0.0, -@corsair_rotation, 0.5, 0.5, 1, 1)
-
-			@hud.draw()
 		end
 	end
 end

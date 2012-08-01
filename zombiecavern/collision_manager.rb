@@ -40,7 +40,7 @@ module ZombieCavern
 			# zombies
 			@game.zombie_manager.zombies.each do |z|
 				if z.intersect? @game.player
-					#game.reset()
+					@game.reset()
 					break
 				end
 			end	

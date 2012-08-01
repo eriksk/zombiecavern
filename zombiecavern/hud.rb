@@ -17,10 +17,13 @@ module ZombieCavern
 			@selected_weapon_tex = game.load_image('selected_weapon')
 			@cover_color = Gosu::Color::BLACK
 			@cover_color.alpha = 150
+
+			@time = 0.0
 		end
 		
 		def update dt
 			@message_box.update dt
+			@time += dt
 		end
 
 		def draw		
@@ -52,6 +55,24 @@ module ZombieCavern
 			else
 				@message_box.draw	
 			end		
+		end
+
+		def draw_start_screen
+			scale = 0.8 + Math::sin(@time * 0.005) * 0.2
+
+			@large_font.draw_rel("Zombie Cavern", $WIDTH / 2.0, 100, 0, 0.5, 0.5, scale, scale)
+			@font.draw_rel("Controls:", $WIDTH / 2.0, 150, 0, 0.5, 0.5)
+
+			@font.draw_rel("W, A, S, D - ", $WIDTH / 2.0, 170, 0, 1.0, 0.5)
+			@font.draw_rel("Move", $WIDTH / 2.0, 170, 0, 0.0, 0.5)
+			@font.draw_rel("Mouse - ", $WIDTH / 2.0, 186, 0, 1.0, 0.5)
+			@font.draw_rel("Aim & Shoot", $WIDTH / 2.0, 186, 0, 0.0, 0.5)
+			@font.draw_rel("1, 2, 3, 4 ... - ", $WIDTH / 2.0, 204, 0, 1.0, 0.5)
+			@font.draw_rel("Change weapons", $WIDTH / 2.0, 204, 0, 0.0, 0.5)
+			@font.draw_rel("Goal:", $WIDTH / 2.0, 244, 0, 0.5, 0.5)
+			@font.draw_rel("SURVIVE", $WIDTH / 2.0, 262, 0, 0.5, 0.5)
+
+			@large_font.draw_rel("Press SPACE to start", $WIDTH / 2.0, 300, 0, 0.5, 0.5, scale, scale)
 		end
 	end
 end
