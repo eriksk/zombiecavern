@@ -5,10 +5,11 @@ module ZombieCavern
 			# sounds
 			@sounds = {
 				:hit => game.load_sound('zombie_hit'),
+				:pickup => game.load_sound('pickup'),
 				:switch_weapon => game.load_sound('switch_weapon'),
 				:wilhelm_scream => game.load_sound('wilhelm_scream'),
 				:blood_1 => game.load_sound('blood_1'),
-				:blood_2 => game.load_sound('blood_2'),
+				:blood_2 => game.load_sound('blood_2')
 			}
 			@songs = {
 				:song => game.load_song('song', 'mp3')

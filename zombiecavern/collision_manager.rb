@@ -44,6 +44,15 @@ module ZombieCavern
 					break
 				end
 			end	
+
+			@game.pickup_manager.pickups.each do |p|
+				if p.intersect? @game.player
+					p.pickup(@game.player)
+					@game.sound_manager.play(:pickup)
+					# TODO: throw some particles
+					@game.pickup_manager.pickups.delete p
+				end
+			end
 		end
 	end
 end

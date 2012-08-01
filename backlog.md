@@ -1,6 +1,6 @@
 # Next up
 
-* Weapon pickups
+* Character legs
 * Better AI
 * Customize waves
 * More enemies
@@ -9,7 +9,8 @@
 
 # Working on
 
-* Character legs
+* Weapon pickups
+* Centralize weapon types
 
 # Completed
 

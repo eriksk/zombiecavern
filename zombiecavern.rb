@@ -16,6 +16,8 @@ require_relative 'zombiecavern/blood_splat'
 require_relative 'zombiecavern/collision_manager'
 require_relative 'zombiecavern/sound_manager'
 require_relative 'zombiecavern/hud'
+require_relative 'zombiecavern/pickup'
+require_relative 'zombiecavern/pickup_manager'
 
 $WIDTH = 800
 $HEIGHT = 600
@@ -28,7 +30,8 @@ module ZombieCavern
 					  :player, 
 					  :particle_manager, 
 					  :bullet_manager, 
-					  :collision_manager, 
+					  :collision_manager,
+					  :pickup_manager, 
 					  :hud,
 					  :total_time,
 					  :kill_count,
@@ -55,6 +58,10 @@ module ZombieCavern
 			@zombie_manager = ZombieManager.new(self)
 			@collision_manager = CollisionManager.new(self)
 			@sound_manager = SoundManager.new(self)
+			@pickup_manager = PickupManager.new(self)
+
+			# sound
+			@sound_manager.play_song(:song)
 
 			@splat_tex = load_image('splat')
 			@splats = []
@@ -66,6 +73,9 @@ module ZombieCavern
 			@paused = false
 			@total_time = 0.0
 			@kill_count = 0
+			@time = Gosu::milliseconds
+			@last_frame_time = 0.0
+			@delta = @time
 
 			# start game
 			reset()
@@ -77,6 +87,10 @@ module ZombieCavern
 
 		def load_image name
 			Gosu::Image.new(self, "content/gfx/#{name}.png", false)
+		end
+
+		def load_image_tiles name, tile_width, tile_height
+			Gosu::Image.load_tiles(self, "content/gfx/#{name}.png", tile_width, tile_height, true)
 		end
 
 		def load_sound name
@@ -104,16 +118,24 @@ module ZombieCavern
 			@kill_count += 1
 		end
 
-		def update
-			if button_down? Gosu::KbEscape
+		def button_down(id)
+			case id
+			when Gosu::KbSpace
+				@paused = !@paused
+			when Gosu::KbEscape
 				exit
 			end
+		end
 
-			if button_down? Gosu::KbSpace
-				@paused = !@paused
-			end
+		def update_delta
+			@last_frame_time = @time
+			@time = Gosu::milliseconds
+			@delta = @time - @last_frame_time
+		end
 
-			dt = 16.0
+		def update
+			update_delta
+			dt = @delta
 
 			if !@paused
 				@total_time += dt
@@ -124,6 +146,7 @@ module ZombieCavern
 				@bullet_manager.update dt
 				@particle_manager.update dt
 				@collision_manager.update dt
+				@pickup_manager.update dt
 				@hud.update dt
 			end
 		end
@@ -135,6 +158,7 @@ module ZombieCavern
 				@splat_tex.draw_rot(splat.position.x, splat.position.y, 0, splat.rotation.to_degrees)
 			end
 
+			@pickup_manager.draw
 			@zombie_manager.draw
 			@bullet_manager.draw
 			@particle_manager.draw

@@ -10,8 +10,8 @@ module ZombieCavern
 			@spread = spread
 			@damage = damage
 			@sound = sound
+			@ammo = @max_ammo == -1 ? -1 : 0
 			@max_ammo = max_ammo.to_f
-			@ammo = @max_ammo
 		end
 
 		def fire bullet_manager, position, angle

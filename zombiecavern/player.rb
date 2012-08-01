@@ -12,7 +12,7 @@ module ZombieCavern
 			@weapons = {
 				:gun => Weapon.new(game.load_sound('fire_gun'), :gun, 100, -1, 5),
 				:smg => Weapon.new(game.load_sound('fire_smg'), :smg, 30, 500, 1, 0.2),
-				:cannon => Weapon.new(game.load_sound('fire_cannon'), :cannon, 1000, 10, 100, 0)
+				:cannon => Weapon.new(game.load_sound('fire_cannon'), :cannon, 400, 10, 100, 0)
 			}
 			@current_weapon = :gun
 		end
@@ -21,6 +21,10 @@ module ZombieCavern
 			@weapons.each do |k, v|
 				v.reload
 			end
+		end
+
+		def add_ammo weapon
+			@weapons[weapon].fill_ammo
 		end
 
 		def switch_weapon weapon
@@ -105,7 +109,7 @@ module ZombieCavern
 						@rotation -= 45.to_radians 
 					end						
 				elsif @game.button_down? Gosu::KbRight
-					rotation = 0.to_radians
+					@rotation = 0.to_radians
 					if @game.button_down? Gosu::KbUp
 						@rotation -= 45.to_radians
 					elsif @game.button_down? Gosu::KbDown

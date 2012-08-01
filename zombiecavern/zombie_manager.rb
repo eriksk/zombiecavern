@@ -45,7 +45,7 @@ module ZombieCavern
 
 		def spawn_children position		
 			4.times do |i|
-				z = Zombie.new(@textures[:normal], :normal)
+				z = Zombie.new(@textures[:runner], :runner)
 				z.position.x = position.x + (-0.5 + rand()) * 64
 				z.position.y = position.y + (-0.5 + rand()) * 64
 				@zombies.push z
