@@ -3,9 +3,9 @@ module ZombieCavern
 
 		attr_accessor :particles
 
-		def initialize particle_tex
+		def initialize game
 			@particles = []
-			@particle_tex = particle_tex
+			@particle_tex = game.load_image('particle')
 		end
 
 		def fire position, count, power = 1.0, duration = 1.0

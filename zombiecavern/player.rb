@@ -5,6 +5,7 @@ module ZombieCavern
 
 		def initialize texture, game
 			super(texture)
+			@game = game
 			@speed = 0.001
 			@velocity = Vec2.new
 
@@ -13,7 +14,7 @@ module ZombieCavern
 				:smg => Weapon.new(game.load_sound('fire_smg'), :smg, 30, 1, 0.2),
 				:cannon => Weapon.new(game.load_sound('fire_cannon'), :cannon, 1000, 100, 0)
 			}
-			@current_weapon = :smg
+			@current_weapon = :gun
 		end
 
 		def reset
@@ -23,7 +24,10 @@ module ZombieCavern
 		end
 
 		def switch_weapon weapon
-			@current_weapon = weapon
+			if @current_weapon != weapon
+				@game.sound_manager.play(:switch_weapon, 1.5)
+				@current_weapon = weapon
+			end	
 		end
 
 		def selected_weapon_index
@@ -36,19 +40,29 @@ module ZombieCavern
 		end
 
 		def update dt
+
+			# switch weapons
+			if @game.button_down? Gosu::Kb1
+				switch_weapon(:gun)
+			elsif @game.button_down? Gosu::Kb2
+				switch_weapon(:smg)
+			elsif @game.button_down? Gosu::Kb3
+				switch_weapon(:cannon)
+			end
+
 			@weapons[@current_weapon].update(dt)
 
 			# input
-			if $game.button_down?Gosu::KbA
+			if @game.button_down?Gosu::KbA
 				@velocity.x -= @speed * dt
 			end
-			if $game.button_down?Gosu::KbD
+			if @game.button_down?Gosu::KbD
 				@velocity.x += @speed * dt
 			end
-			if $game.button_down?Gosu::KbW
+			if @game.button_down?Gosu::KbW
 				@velocity.y -= @speed * dt
 			end
-			if $game.button_down?Gosu::KbS
+			if @game.button_down?Gosu::KbS
 				@velocity.y += @speed * dt
 			end
 
@@ -74,6 +88,39 @@ module ZombieCavern
 				@position.y = $HEIGHT
 				@velocity.y *= -1
 			end
+
+			# bullets
+			if @game.button_down? Gosu::MsLeft
+				@rotation = Math::atan2(@game.mouse_y - position.y, 
+									   @game.mouse_x - position.x)	
+				if @weapons[@current_weapon].fire(@game.bullet_manager, @position, @rotation)
+					@weapons[@current_weapon].sound.play()
+				end
+			elsif @game.button_down?(Gosu::KbLeft) || @game.button_down?(Gosu::KbRight) || @game.button_down?(Gosu::KbUp) || @game.button_down?(Gosu::KbDown)
+				if @game.button_down? Gosu::KbLeft
+					@rotation = -180.to_radians
+					if @game.button_down? Gosu::KbUp
+						@rotation += 45.to_radians
+					elsif @game.button_down? Gosu::KbDown
+						@rotation -= 45.to_radians 
+					end						
+				elsif @game.button_down? Gosu::KbRight
+					rotation = 0.to_radians
+					if @game.button_down? Gosu::KbUp
+						@rotation -= 45.to_radians
+					elsif @game.button_down? Gosu::KbDown
+						@rotation += 45.to_radians 
+					end						
+				elsif @game.button_down? Gosu::KbUp
+					@rotation = -90.to_radians
+				elsif @game.button_down? Gosu::KbDown
+					@rotation = 90.to_radians
+				end
+				if @weapons[@current_weapon].fire(@game.bullet_manager, @position, @rotation)
+					@weapons[@current_weapon].sound.play()
+				end
+			end
+		
 		end
 	end
 end

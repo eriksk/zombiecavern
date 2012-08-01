@@ -3,9 +3,13 @@ module ZombieCavern
 
 		attr_accessor :bullets
 
-		def initialize bullet_textures
+		def initialize game
 			@bullets = []
-			@bullet_textures = bullet_textures
+			@bullet_textures = {
+				:gun => game.load_image('bullet_gun'),
+				:smg => game.load_image('bullet_smg'),
+				:cannon => game.load_image('bullet_cannon'),
+			}
 		end
 
 		def fire position, velocity, damage, type

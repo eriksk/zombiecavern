@@ -3,8 +3,12 @@ module ZombieCavern
 
 		attr_accessor :zombies, :wave
 
-		def initialize textures
-			@textures = textures
+		def initialize game
+			@textures = {
+				:normal => game.load_image('zombie'),
+				:runner => game.load_image('zombie_runner'),
+				:brute => game.load_image('zombie_brute'),
+			}
 			@zombies = []
 			@wave = 0
 		end
