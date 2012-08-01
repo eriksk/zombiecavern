@@ -10,9 +10,9 @@ module ZombieCavern
 			@velocity = Vec2.new
 
 			@weapons = {
-				:gun => Weapon.new(game.load_sound('fire_gun'), :gun, 100, 5),
-				:smg => Weapon.new(game.load_sound('fire_smg'), :smg, 30, 1, 0.2),
-				:cannon => Weapon.new(game.load_sound('fire_cannon'), :cannon, 1000, 100, 0)
+				:gun => Weapon.new(game.load_sound('fire_gun'), :gun, 100, -1, 5),
+				:smg => Weapon.new(game.load_sound('fire_smg'), :smg, 30, 500, 1, 0.2),
+				:cannon => Weapon.new(game.load_sound('fire_cannon'), :cannon, 1000, 10, 100, 0)
 			}
 			@current_weapon = :gun
 		end

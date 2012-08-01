@@ -1,18 +1,23 @@
 module ZombieCavern
 	class Weapon
 
-		attr_accessor :sound
+		attr_accessor :sound, :ammo, :max_ammo
 
-		def initialize sound, type, interval, damage = 1, spread = 0.0
+		def initialize sound, type, interval, max_ammo, damage = 1, spread = 0.0
 			@current = 0.0
 			@type = type
 			@interval = interval
 			@spread = spread
 			@damage = damage
 			@sound = sound
+			@max_ammo = max_ammo.to_f
+			@ammo = @max_ammo
 		end
 
 		def fire bullet_manager, position, angle
+			if @ammo == 0
+				return false
+			end
 			if @current > @interval
 				@current = 0.0
 				angle += (-0.5 + rand()) * @spread
@@ -22,6 +27,7 @@ module ZombieCavern
 					@damage,
 					@type
 				)
+				@ammo -= 1 unless @ammo == -1
 				return true
 			end
 			return false
@@ -29,6 +35,18 @@ module ZombieCavern
 
 		def reload
 			@current = @interval + 1
+			fill_ammo()
+		end
+
+		def fill_ammo
+			@ammo = @max_ammo
+		end
+
+		def ammo_left
+			if @ammo == -1
+				return 1.0
+			end
+			@ammo / @max_ammo
 		end
 
 		def progress

@@ -31,7 +31,8 @@ module ZombieCavern
 					  :collision_manager, 
 					  :hud,
 					  :total_time,
-					  :kill_count
+					  :kill_count,
+					  :paused
 
 		def initialize
 			super $WIDTH, $HEIGHT, false
@@ -109,12 +110,12 @@ module ZombieCavern
 			end
 
 			if button_down? Gosu::KbSpace
-				paused = !paused
+				@paused = !@paused
 			end
 
 			dt = 16.0
 
-			if !paused
+			if !@paused
 				@total_time += dt
 				@corsair_rotation += 0.15 * dt
 				

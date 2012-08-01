@@ -1,6 +1,5 @@
 # Next up
 
-* Character legs
 * Weapon pickups
 * Better AI
 * Customize waves
@@ -10,6 +9,9 @@
 
 # Working on
 
-* Not unlimited ammo
+* Character legs
 
 # Completed
+
+* Pause
+* Not unlimited ammo
