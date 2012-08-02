@@ -18,6 +18,7 @@ require_relative 'zombiecavern/sound_manager'
 require_relative 'zombiecavern/hud'
 require_relative 'zombiecavern/pickup'
 require_relative 'zombiecavern/pickup_manager'
+require_relative 'zombiecavern/legs'
 
 $WIDTH = 800
 $HEIGHT = 600
@@ -63,7 +64,7 @@ module ZombieCavern
 			@pickup_manager = PickupManager.new(self)
 
 			# sound
-			@sound_manager.play_song(:song)
+			#@sound_manager.play_song(:song)
 
 			@splat_tex = load_image('splat')
 			@splats = []

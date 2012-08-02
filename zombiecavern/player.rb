@@ -9,6 +9,8 @@ module ZombieCavern
 			@speed = 0.001
 			@velocity = Vec2.new
 
+			@legs = Legs.new(game, 130)
+
 			@weapons = {
 				:gun => Weapon.new(game.load_sound('fire_gun'), :gun, 100, -1, 5),
 				:smg => Weapon.new(game.load_sound('fire_smg'), :smg, 30, 500, 1, 0.2),
@@ -56,18 +58,24 @@ module ZombieCavern
 
 			@weapons[@current_weapon].update(dt)
 
+			moved = false
+			
 			# input
 			if @game.button_down?Gosu::KbA
 				@velocity.x -= @speed * dt
+				moved = true
 			end
 			if @game.button_down?Gosu::KbD
 				@velocity.x += @speed * dt
+				moved = true
 			end
 			if @game.button_down?Gosu::KbW
 				@velocity.y -= @speed * dt
+				moved = true
 			end
 			if @game.button_down?Gosu::KbS
 				@velocity.y += @speed * dt
+				moved = true
 			end
 
 			@velocity.x *= 0.9
@@ -124,7 +132,14 @@ module ZombieCavern
 					@weapons[@current_weapon].sound.play()
 				end
 			end
-		
+
+			if moved
+				@legs.update dt
+			end
+		end
+
+		def before_draw
+			@legs.draw @position, @rotation
 		end
 	end
 end

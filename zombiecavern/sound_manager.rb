@@ -1,6 +1,8 @@
 module ZombieCavern
 	class SoundManager
 
+		attr_accessor :volume
+
 		def initialize game 
 			# sounds
 			@sounds = {
@@ -14,10 +16,11 @@ module ZombieCavern
 			@songs = {
 				:song => game.load_song('song', 'mp3')
 			}
+			@volume = 1.0
 		end
 
 		def play(name, volume = 1.0)
-			@sounds[name].play(volume)
+			@sounds[name].play(volume * @volume)
 		end
 
 		def play_song(name)

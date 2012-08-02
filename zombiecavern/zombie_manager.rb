@@ -4,6 +4,7 @@ module ZombieCavern
 		attr_accessor :zombies, :wave
 
 		def initialize game
+			@game = game
 			@textures = {
 				:normal => game.load_image('zombie'),
 				:runner => game.load_image('zombie_runner'),
@@ -28,7 +29,7 @@ module ZombieCavern
 				elsif type_val > 0.8
 					type = :runner
 				end
-				z = Zombie.new(@textures[type], type)
+				z = Zombie.new(@textures[type], type, @game)
 				left = rand() > 0.5
 				if left
 					z.position.x = -100 * rand()
@@ -45,7 +46,7 @@ module ZombieCavern
 
 		def spawn_children position		
 			4.times do |i|
-				z = Zombie.new(@textures[:runner], :runner)
+				z = Zombie.new(@textures[:runner], :runner, @game)
 				z.position.x = position.x + (-0.5 + rand()) * 64
 				z.position.y = position.y + (-0.5 + rand()) * 64
 				@zombies.push z

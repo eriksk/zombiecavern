@@ -32,8 +32,18 @@ module ZombieCavern
 		def update dt
 		end
 
+		def before_draw
+			
+		end
+
 		def draw
+			before_draw
 			@texture.draw_rot(@position.x, @position.y, 0.0, @rotation.to_degrees, @origin.x, @origin.y, @scale, @scale)
+			after_draw
+		end
+
+		def after_draw
+			
 		end
 	end
 end
